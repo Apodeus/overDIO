@@ -14,7 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 
 
-@Path("/hello")
+@Path("/images")
 public class ImageManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageManager.class);

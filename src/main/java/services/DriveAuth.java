@@ -23,10 +23,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class DriveAuth {
 
@@ -79,7 +77,7 @@ public class DriveAuth {
     }
 
     public List<File> getImages(List<String> IDsImageList) throws IOException {
-        LOGGER.debug("Acces au stockage Drive pour recuperer les images");
+        LOGGER.info("Acces au stockage Drive pour recuperer les images");
         List<File> result = new ArrayList<>();
         for(String id : IDsImageList){
             result.add(service.files().get(id).execute());
@@ -87,7 +85,7 @@ public class DriveAuth {
         return result;
     }
 
-    //TODO: Pas sur que cette méthode soit utile, plus pour du debug imo
+    //TODO: Pas sur que cette méthode soit utile, plus pour du debug
     public List<File> getImages() throws IOException {
         //todo : return list of images
         FileList result = service.files().list().execute();
