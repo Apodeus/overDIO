@@ -76,10 +76,10 @@ public class DriveAuth {
         //todo : update ...
     }
 
-    public List<File> getImages(List<String> IDsImageList) throws IOException {
+    public List<File> getImages(List<String> idsImageList) throws IOException {
         LOGGER.info("Acces au stockage Drive pour recuperer les images");
         List<File> result = new ArrayList<>();
-        for(String id : IDsImageList){
+        for(String id : idsImageList){
             result.add(service.files().get(id).execute());
         }
         return result;
@@ -91,6 +91,4 @@ public class DriveAuth {
         FileList result = service.files().list().execute();
         return result.getFiles();
     }
-
-
 }
