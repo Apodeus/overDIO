@@ -12,14 +12,21 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
+import com.google.api.services.drive.model.File;
+import com.google.api.services.drive.model.FileList;
 import fr.overdio.HelloWorldResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.security.GeneralSecurityException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class DriveAuth {
 
@@ -29,6 +36,7 @@ public class DriveAuth {
     private static final String CREDENTIALS_FILE_PATH = "/credentials.json";
     private static final List<String> SCOPES = Collections.singletonList(DriveScopes.DRIVE_METADATA_READONLY);
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
+    private static final Logger LOGGER = LoggerFactory.getLogger(DriveAuth.class);
 
     private static DriveAuth instance;
 
@@ -59,7 +67,6 @@ public class DriveAuth {
                 .build();
 
         LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8888).build();
-
         return new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
     }
 
@@ -71,9 +78,20 @@ public class DriveAuth {
         //todo : update ...
     }
 
-    public List<?> getImages(/*...*/){
+    public List<File> getImages(List<String> IDsImageList) throws IOException {
+        LOGGER.debug("Acces au stockage Drive pour recuperer les images");
+        List<File> result = new ArrayList<>();
+        for(String id : IDsImageList){
+            result.add(service.files().get(id).execute());
+        }
+        return result;
+    }
+
+    //TODO: Pas sur que cette méthode soit utile, plus pour du debug imo
+    public List<File> getImages() throws IOException {
         //todo : return list of images
-        return null;
+        FileList result = service.files().list().execute();
+        return result.getFiles();
     }
 
 
