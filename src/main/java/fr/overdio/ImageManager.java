@@ -1,5 +1,6 @@
 package fr.overdio;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import exceptions.OverDioException;
 import models.Image;
@@ -8,10 +9,7 @@ import org.slf4j.LoggerFactory;
 import services.DriveAuth;
 import services.ImageDAO;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -48,6 +46,40 @@ public class ImageManager {
             //Write error code in response
             throw e;
         }
+        return mapper.writeValueAsString(image);
+    }
+
+    // Not sure about the type of the paramater image
+    // should maybe give only an array of tags ...
+    @PUT
+    @Path("/{id}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public String updateImage(Image image, @PathParam("id") String id) throws JsonProcessingException {
+        if(id != image.get_id()){
+            LOGGER.warn("L'id de l'image donnée ne correspond pas à l'id de la route");
+            //Error code and stop
+        }
+        Image imageDB = null;
+        try {
+            imageDB = imageDAO.getImageById(id);
+        } catch (IOException e) {
+            //Error code and stop
+            LOGGER.warn("Erreur lors de la récupération de l'image en BDD avec l'id = " + id);
+
+        }
+        if(!imageDB.getIdGoogleDrive().equals(image.getIdGoogleDrive())){
+            //Error code and stop
+            LOGGER.warn("L'image correspondant à la route et l'image donnée n'ont pas le meme id google drive");
+        }
+        //Then update in DB
+        try {
+            imageDAO.update(image);
+        } catch (JsonProcessingException e) {
+            //Error code and stop
+            LOGGER.warn("Erreur lors de la mise à jour de l'image donnée en base de donnée");
+        }
+
         return mapper.writeValueAsString(image);
     }
 }
