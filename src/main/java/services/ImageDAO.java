@@ -26,15 +26,13 @@ public class ImageDAO {
     private static ImageDAO imageDAO;
     private final ObjectMapper mapper;
 
-    private final MongoDatabase database;
     private final MongoCollection<Document> collection;
-    private final MongoClient mongoClient;
 
     private ImageDAO(){
         this.mapper = new ObjectMapper();
-        this.mongoClient = new MongoClient();
-        this.database = this.mongoClient.getDatabase(DB_NAME);
-        this.collection = this.database.getCollection(DB_COLLECTION);
+        MongoClient mongoClient = new MongoClient();
+        MongoDatabase database = mongoClient.getDatabase(DB_NAME);
+        this.collection = database.getCollection(DB_COLLECTION);
     }
 
     public static ImageDAO getInstance(){
@@ -69,7 +67,7 @@ public class ImageDAO {
 
     public void update(Image image) throws JsonProcessingException {
         String id = image.get_id();
-        LOGGER.info("Updating image with id : " + id);
+        LOGGER.info("Updating image with id : {}", id);
         String jsonString = mapper.writeValueAsString(image);
         collection.replaceOne(Filters.eq("_id", id), Document.parse(jsonString));
     }

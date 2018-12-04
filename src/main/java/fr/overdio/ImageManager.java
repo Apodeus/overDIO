@@ -24,6 +24,8 @@ public class ImageManager {
     private final ImageDAO imageDAO;
     private final ObjectMapper mapper;
 
+    //Todo : Injecter ces services dans le constructeur plutot que de les
+    // créer dedans => Permet de mieux tester la partie Back (métier)
     public ImageManager() throws GeneralSecurityException, IOException {
         this.drive = DriveAuth.getInstance();
         this.imageDAO = ImageDAO.getInstance();
@@ -38,8 +40,8 @@ public class ImageManager {
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
     public String getImage(@PathParam("id") String id) throws IOException {
-        LOGGER.info("Requete GET : Recuperation de l'image d'id : " + id);
-        Image image = null;
+        LOGGER.info("Requete GET : Recuperation de l'image d'id : {}", id );
+        Image image;
         try {
             image = imageDAO.getImageById(id);
         } catch (OverDioException e){
@@ -65,7 +67,7 @@ public class ImageManager {
             imageDB = imageDAO.getImageById(id);
         } catch (IOException e) {
             //Error code and stop
-            LOGGER.warn("Erreur lors de la récupération de l'image en BDD avec l'id = " + id);
+            LOGGER.warn("Erreur lors de la récupération de l'image en BDD avec l'id = {}", id);
 
         }
         if(!imageDB.getIdGoogleDrive().equals(image.getIdGoogleDrive())){
