@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import exceptions.OverDioException;
 import models.Image;
+import models.ImageUploadObject;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.slf4j.Logger;
@@ -15,6 +16,10 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.io.*;
 import java.security.GeneralSecurityException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Stream;
 
 
 @Path("/images")
@@ -22,14 +27,12 @@ public class ImageManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageManager.class);
 
-    private final DriveAuth drive;
     private final ImageDAO imageDAO;
     private final ObjectMapper mapper;
 
     //Todo : Injecter ces services dans le constructeur plutot que de les
     // créer dedans => Permet de mieux tester la partie Back (métier)
     public ImageManager() throws GeneralSecurityException, IOException {
-        this.drive = DriveAuth.getInstance();
         this.imageDAO = new ImageDAO();
         this.mapper = new ObjectMapper();
     }
@@ -79,32 +82,41 @@ public class ImageManager {
         return mapper.writeValueAsString(image);
     }
 
-
+/*
+    @GET
+    @Path("/init")
+    public void initDb() throws JsonProcessingException {
+        Image img = new Image("1o3n_8ZVbmx2ZvB5ZKBHd4iBHYeCle5y9");
+        Image img2   = new Image("1UEup0JRETegBHBX2oE98Y9qdqXllHUfc");
+        imageDAO.addImage(img);
+        imageDAO.addImage(img2);
+    }
+*/
     @POST
     @Path("/upload")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
-    public String addImage(@FormDataParam("file") InputStream uploadFileInputStream,
-                          @FormDataParam("file") FormDataContentDisposition fileDetail) throws JsonProcessingException {
-        String tmpFileLocation = "/tmp/" + fileDetail.getName();
-        LOGGER.info("TMP File Location : {}", tmpFileLocation);
-        try(OutputStream os = new FileOutputStream(new File(tmpFileLocation))) {
-            int read = 0;
-            byte[] bytes = new byte[1024];
-            while((read = uploadFileInputStream.read(bytes)) != -1){
-                os.write(bytes, 0, read);
-            }
-            os.flush();
+    public String addImage(@FormDataParam("data") byte[] image, @FormDataParam("tagList") List<String> tagList) throws JsonProcessingException, GeneralSecurityException {
+        String fp = UUID.randomUUID().toString();
+        String tmpFileLocation = "/tmp/" + fp;
+        File f = new File(tmpFileLocation);
+
+        try {
+            FileOutputStream fos = new FileOutputStream(f);
+            fos.write(image);
         } catch (FileNotFoundException e) {
-            throw new NotFoundException(e);
+            e.printStackTrace();
         } catch (IOException e) {
-            throw new InternalServerErrorException(e);
+            e.printStackTrace();
         }
+
+
         String idDrive;
         Image savedImage;
         try {
-            idDrive = drive.saveImage(tmpFileLocation);
+            idDrive = DriveAuth.getInstance().saveImage(tmpFileLocation);
             savedImage = new Image(idDrive);
+            savedImage.setTagList(tagList);
             imageDAO.addImage(savedImage);
         } catch (IOException e) {
             throw new InternalServerErrorException(e);

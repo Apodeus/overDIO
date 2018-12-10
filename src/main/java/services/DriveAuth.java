@@ -85,7 +85,6 @@ public class DriveAuth {
 
         String imageType = "image/jpeg";
         FileContent mediaContent = new FileContent(imageType, file);
-
         File finalFile = service.files().create(fileMetadata, mediaContent)
                 .setFields("id")
                 .execute();
