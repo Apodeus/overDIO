@@ -1,5 +1,6 @@
 package models;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -40,11 +41,15 @@ public class Image {
         this.idGoogleDrive = idGoogleDrive;
     }
 
+    public void setTagList(List<String> tagList) {
+        this.tagList = tagList;
+    }
+
     public List<String> getTagList() {
         return tagList;
     }
 
-    public void setTagList(List<String> tagList) {
-        this.tagList = tagList;
+    public String toString(){
+        return MessageFormat.format("id: {0}\nid_drive: {1}\ntags: {2}",_id, idGoogleDrive, tagList.toString());
     }
 }

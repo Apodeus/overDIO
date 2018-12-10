@@ -28,13 +28,9 @@ public class ImageManager {
     // créer dedans => Permet de mieux tester la partie Back (métier)
     public ImageManager() throws GeneralSecurityException, IOException {
         this.drive = DriveAuth.getInstance();
-        this.imageDAO = ImageDAO.getInstance();
+        this.imageDAO = new ImageDAO();
         this.mapper = new ObjectMapper();
     }
-
-    // ID of images in Google Drive (TMP -> must be removed from code)
-    //String dioID = "1o3n_8ZVbmx2ZvB5ZKBHd4iBHYeCle5y9";
-    //String jojoID = "1UEup0JRETegBHBX2oE98Y9qdqXllHUfc";
 
     @GET
     @Path("/{id}")
@@ -46,13 +42,14 @@ public class ImageManager {
             image = imageDAO.getImageById(id);
         } catch (OverDioException e){
             //Write error code in response
-            throw e;
+            throw new NotFoundException();
         }
         return mapper.writeValueAsString(image);
     }
 
     // Not sure about the type of the paramater image
     // should maybe give only an array of tags ...
+
     @PUT
     @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -60,28 +57,31 @@ public class ImageManager {
     public String updateImage(Image image, @PathParam("id") String id) throws JsonProcessingException {
         if(id != image.get_id()){
             LOGGER.warn("L'id de l'image donnée ne correspond pas à l'id de la route");
-            //Error code and stop
+            throw new BadRequestException();
         }
-        Image imageDB = null;
+        Image imageDB;
         try {
             imageDB = imageDAO.getImageById(id);
         } catch (IOException e) {
-            //Error code and stop
             LOGGER.warn("Erreur lors de la récupération de l'image en BDD avec l'id = {}", id);
-
+            throw new InternalServerErrorException();
         }
         if(!imageDB.getIdGoogleDrive().equals(image.getIdGoogleDrive())){
-            //Error code and stop
             LOGGER.warn("L'image correspondant à la route et l'image donnée n'ont pas le meme id google drive");
+            throw new BadRequestException();
         }
         //Then update in DB
         try {
             imageDAO.update(image);
         } catch (JsonProcessingException e) {
-            //Error code and stop
             LOGGER.warn("Erreur lors de la mise à jour de l'image donnée en base de donnée");
+            throw new BadRequestException();
         }
-
         return mapper.writeValueAsString(image);
     }
+
+
+    // ID of images in Google Drive (TMP -> must be removed from code)
+    //String dioID = "1o3n_8ZVbmx2ZvB5ZKBHd4iBHYeCle5y9";
+    //String jojoID = "1UEup0JRETegBHBX2oE98Y9qdqXllHUfc";
 }

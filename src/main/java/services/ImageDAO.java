@@ -23,23 +23,15 @@ public class ImageDAO {
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageDAO.class);
     private static final String DB_NAME = "overDio";
     private static final String DB_COLLECTION = "images";
-    private static ImageDAO imageDAO;
     private final ObjectMapper mapper;
 
     private final MongoCollection<Document> collection;
 
-    private ImageDAO(){
+    public ImageDAO(){
         this.mapper = new ObjectMapper();
         MongoClient mongoClient = new MongoClient();
         MongoDatabase database = mongoClient.getDatabase(DB_NAME);
         this.collection = database.getCollection(DB_COLLECTION);
-    }
-
-    public static ImageDAO getInstance(){
-        if(imageDAO == null) {
-            imageDAO = new ImageDAO();
-        }
-        return imageDAO;
     }
 
     public List<Image> getImagesByTags(List<String> tagList) throws IOException {
