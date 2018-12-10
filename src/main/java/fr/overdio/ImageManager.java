@@ -20,7 +20,6 @@ import java.security.GeneralSecurityException;
 import java.util.List;
 import java.util.UUID;
 
-
 @Path("/images")
 public class ImageManager {
 
@@ -81,12 +80,12 @@ public class ImageManager {
         return mapper.writeValueAsString(image);
     }
 
-
     @POST
-    @Path("upload")
+    @Path("/upload")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
-    public String addImage(@FormDataParam("data") byte[] image, @FormDataParam("tagList") List<String> tagList) throws JsonProcessingException, GeneralSecurityException {
+    public String addImage(@FormDataParam("file") byte[] image,
+                           @FormDataParam("file") List<String> tagList) throws JsonProcessingException, GeneralSecurityException {
         String fp = UUID.randomUUID().toString();
         String tmpFileLocation = "/tmp/" + fp;
         File f = new File(tmpFileLocation);
@@ -113,7 +112,6 @@ public class ImageManager {
         }
         return mapper.writeValueAsString(savedImage);
     }
-
 
     // ID of images in Google Drive (TMP -> must be removed from code)
     //String dioID = "1o3n_8ZVbmx2ZvB5ZKBHd4iBHYeCle5y9";
