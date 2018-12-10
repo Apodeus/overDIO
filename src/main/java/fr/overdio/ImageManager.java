@@ -4,8 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import exceptions.OverDioException;
 import models.Image;
-import models.ImageUploadObject;
-import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,12 +12,13 @@ import services.ImageDAO;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Stream;
 
 
 @Path("/images")
@@ -82,18 +81,9 @@ public class ImageManager {
         return mapper.writeValueAsString(image);
     }
 
-/*
-    @GET
-    @Path("/init")
-    public void initDb() throws JsonProcessingException {
-        Image img = new Image("1o3n_8ZVbmx2ZvB5ZKBHd4iBHYeCle5y9");
-        Image img2   = new Image("1UEup0JRETegBHBX2oE98Y9qdqXllHUfc");
-        imageDAO.addImage(img);
-        imageDAO.addImage(img2);
-    }
-*/
+
     @POST
-    @Path("/upload")
+    @Path("upload")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
     public String addImage(@FormDataParam("data") byte[] image, @FormDataParam("tagList") List<String> tagList) throws JsonProcessingException, GeneralSecurityException {
@@ -123,7 +113,6 @@ public class ImageManager {
         }
         return mapper.writeValueAsString(savedImage);
     }
-
 
 
     // ID of images in Google Drive (TMP -> must be removed from code)
