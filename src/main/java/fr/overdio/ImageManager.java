@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import exceptions.OverDioException;
 import models.Image;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import services.DriveAuth;
@@ -11,7 +13,7 @@ import services.ImageDAO;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
-import java.io.IOException;
+import java.io.*;
 import java.security.GeneralSecurityException;
 
 
@@ -47,10 +49,7 @@ public class ImageManager {
         return mapper.writeValueAsString(image);
     }
 
-    // Not sure about the type of the paramater image
-    // should maybe give only an array of tags ...
-
-    @PUT
+    @PUT //Should implement PATCH
     @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
@@ -79,6 +78,40 @@ public class ImageManager {
         }
         return mapper.writeValueAsString(image);
     }
+
+
+    @POST
+    @Path("/upload")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Produces(MediaType.APPLICATION_JSON)
+    public String addImage(@FormDataParam("file") InputStream uploadFileInputStream,
+                          @FormDataParam("file") FormDataContentDisposition fileDetail) throws JsonProcessingException {
+        String tmpFileLocation = "/tmp/" + fileDetail.getName();
+        LOGGER.info("TMP File Location : {}", tmpFileLocation);
+        try(OutputStream os = new FileOutputStream(new File(tmpFileLocation))) {
+            int read = 0;
+            byte[] bytes = new byte[1024];
+            while((read = uploadFileInputStream.read(bytes)) != -1){
+                os.write(bytes, 0, read);
+            }
+            os.flush();
+        } catch (FileNotFoundException e) {
+            throw new NotFoundException(e);
+        } catch (IOException e) {
+            throw new InternalServerErrorException(e);
+        }
+        String idDrive;
+        Image savedImage;
+        try {
+            idDrive = drive.saveImage(tmpFileLocation);
+            savedImage = new Image(idDrive);
+            imageDAO.addImage(savedImage);
+        } catch (IOException e) {
+            throw new InternalServerErrorException(e);
+        }
+        return mapper.writeValueAsString(savedImage);
+    }
+
 
 
     // ID of images in Google Drive (TMP -> must be removed from code)

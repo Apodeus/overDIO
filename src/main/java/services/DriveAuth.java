@@ -6,6 +6,7 @@ import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.http.FileContent;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
@@ -68,8 +69,28 @@ public class DriveAuth {
         return new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
     }
 
-    public void saveImage(/*....*/){
-        //todo : save ...
+
+    /**
+     * Save an image on google drive.
+     * @param path The path of file to upload
+     * @return The ID of the File on Google Drive
+     * @throws IOException
+     */
+    public String saveImage(String path) throws IOException {
+        File fileMetadata = new File();
+        //String imgName = UUID.randomUUID().toString();
+        //fileMetadata.setName(imgName);
+
+        java.io.File file = new java.io.File(path);
+
+        String imageType = "image/jpeg";
+        FileContent mediaContent = new FileContent(imageType, file);
+
+        File finalFile = service.files().create(fileMetadata, mediaContent)
+                .setFields("id")
+                .execute();
+        LOGGER.info("Image saved on drive !");
+        return finalFile.getId();
     }
 
     public void updateImage(/*...*/){
