@@ -12,10 +12,7 @@ import services.ImageDAO;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.security.GeneralSecurityException;
 import java.util.List;
 import java.util.UUID;
@@ -84,21 +81,22 @@ public class ImageManager {
     @Path("/upload")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
-    public String addImage(@FormDataParam("file") byte[] image,
-                           @FormDataParam("file") List<String> tagList) throws JsonProcessingException, GeneralSecurityException {
+    public String addImage(@FormDataParam("data") InputStream image,
+                           @FormDataParam("tagList") List<String> tagList) throws IOException, GeneralSecurityException {
         String fp = UUID.randomUUID().toString();
-        String tmpFileLocation = "/tmp/" + fp;
+        String tmpFileLocation = "tmp/" + fp;
         File f = new File(tmpFileLocation);
 
-        try {
-            FileOutputStream fos = new FileOutputStream(f);
-            fos.write(image);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+        FileOutputStream fos = new FileOutputStream(f);
+        int read = 0;
+        byte[] buffer = new byte[1024];
+        while ((read = image.read(buffer)) != -1){
+            fos.write(buffer, 0, read);
         }
+        fos.flush();
 
+
+        LOGGER.info("slt");
 
         String idDrive;
         Image savedImage;
