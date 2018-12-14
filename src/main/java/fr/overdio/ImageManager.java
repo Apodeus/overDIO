@@ -84,7 +84,7 @@ public class ImageManager {
     public String addImage(@FormDataParam("data") InputStream image,
                            @FormDataParam("tagList") List<String> tagList) throws IOException, GeneralSecurityException {
         String fp = UUID.randomUUID().toString();
-        String tmpFileLocation = "tmp/" + fp;
+        String tmpFileLocation = fp;
         File f = new File(tmpFileLocation);
 
         FileOutputStream fos = new FileOutputStream(f);
@@ -106,8 +106,9 @@ public class ImageManager {
             savedImage.setTagList(tagList);
             imageDAO.addImage(savedImage);
         } catch (IOException e) {
-            throw new InternalServerErrorException(e);
+            throw new UncheckedIOException(e);
         }
+
         return mapper.writeValueAsString(savedImage);
     }
 
