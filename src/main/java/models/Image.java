@@ -8,20 +8,20 @@ import java.util.UUID;
 public class Image {
 
     private String _id;
-    private String idGoogleDrive;
+    private String imgUrl;
     private List<String> tagList;
 
     public Image(){
         this(null);
     }
 
-    public Image(String idGoogleDrive){
-        this(UUID.randomUUID().toString(), idGoogleDrive, new ArrayList<>());
+    public Image(String imgUrl){
+        this(UUID.randomUUID().toString(), imgUrl, new ArrayList<>());
     }
 
-    public Image(String _id, String idGoogleDrive, List<String> tagList){
+    public Image(String _id, String imgUrl, List<String> tagList){
         this._id = _id;
-        this.idGoogleDrive = idGoogleDrive;
+        this.imgUrl = imgUrl;
         this.tagList = tagList;
     }
 
@@ -33,12 +33,12 @@ public class Image {
         this._id = _id;
     }
 
-    public String getIdGoogleDrive() {
-        return idGoogleDrive;
+    public String getImgUrl() {
+        return imgUrl;
     }
 
-    public void setIdGoogleDrive(String idGoogleDrive) {
-        this.idGoogleDrive = idGoogleDrive;
+    public void setImgUrl(String imgUrl) {
+        this.imgUrl = imgUrl;
     }
 
     public void setTagList(List<String> tagList) {
@@ -50,6 +50,6 @@ public class Image {
     }
 
     public String toString(){
-        return MessageFormat.format("id: {0}\nid_drive: {1}\ntags: {2}",_id, idGoogleDrive, tagList.toString());
+        return MessageFormat.format("id: {0}\nid_drive: {1}\ntags: {2}",_id, imgUrl, tagList.toString());
     }
 }

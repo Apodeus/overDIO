@@ -7,14 +7,14 @@ import models.Image;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import services.DriveAuth;
 import services.ImageDAO;
+import services.ImgurService;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.io.*;
 import java.security.GeneralSecurityException;
-import java.util.List;
+import java.util.Arrays;
 import java.util.UUID;
 
 @Path("/images")
@@ -24,10 +24,12 @@ public class ImageManager {
 
     private final ImageDAO imageDAO;
     private final ObjectMapper mapper;
+    private final ImgurService imgurService;
 
     //Todo : Injecter ces services dans le constructeur plutot que de les
     // créer dedans => Permet de mieux tester la partie Back (métier)
     public ImageManager() throws GeneralSecurityException, IOException {
+        this.imgurService = new ImgurService();
         this.imageDAO = new ImageDAO();
         this.mapper = new ObjectMapper();
     }
@@ -36,7 +38,7 @@ public class ImageManager {
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
     public String getImage(@PathParam("id") String id) throws IOException {
-        LOGGER.info("Requete GET : Recuperation de l'image d'id : {}", id );
+        LOGGER.info("Requete GET : Recuperation de l''image d''id : {}", id );
         Image image;
         try {
             image = imageDAO.getImageById(id);
@@ -53,25 +55,25 @@ public class ImageManager {
     @Produces(MediaType.APPLICATION_JSON)
     public String updateImage(Image image, @PathParam("id") String id) throws JsonProcessingException {
         if(id != image.get_id()){
-            LOGGER.warn("L'id de l'image donnée ne correspond pas à l'id de la route");
+            LOGGER.warn("L''id de l''image donnée ne correspond pas à l''id de la route");
             throw new BadRequestException();
         }
         Image imageDB;
         try {
             imageDB = imageDAO.getImageById(id);
         } catch (IOException e) {
-            LOGGER.warn("Erreur lors de la récupération de l'image en BDD avec l'id = {}", id);
+            LOGGER.warn("Erreur lors de la récupération de l''image en BDD avec l''id = {}", id);
             throw new InternalServerErrorException();
         }
-        if(!imageDB.getIdGoogleDrive().equals(image.getIdGoogleDrive())){
-            LOGGER.warn("L'image correspondant à la route et l'image donnée n'ont pas le meme id google drive");
+        if(!imageDB.getImgUrl().equals(image.getImgUrl())){
+            LOGGER.warn("L''image correspondant à la route et l''image donnée n''ont pas le meme id google drive");
             throw new BadRequestException();
         }
         //Then update in DB
         try {
             imageDAO.update(image);
         } catch (JsonProcessingException e) {
-            LOGGER.warn("Erreur lors de la mise à jour de l'image donnée en base de donnée");
+            LOGGER.warn("Erreur lors de la mise à jour de l''image donnée en base de donnée");
             throw new BadRequestException();
         }
         return mapper.writeValueAsString(image);
@@ -82,9 +84,9 @@ public class ImageManager {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
     public String addImage(@FormDataParam("data") InputStream image,
-                           @FormDataParam("tagList") List<String> tagList) throws IOException, GeneralSecurityException {
+                           @FormDataParam("tagList") String tagList) throws IOException {
         String fp = UUID.randomUUID().toString();
-        String tmpFileLocation = fp;
+        String tmpFileLocation = "/tmp/" + fp + ".jpg";
         File f = new File(tmpFileLocation);
 
         FileOutputStream fos = new FileOutputStream(f);
@@ -95,24 +97,16 @@ public class ImageManager {
         }
         fos.flush();
 
-
-        LOGGER.info("slt");
-
-        String idDrive;
+        String imgUrl;
         Image savedImage;
         try {
-            idDrive = DriveAuth.getInstance().saveImage(tmpFileLocation);
-            savedImage = new Image(idDrive);
-            savedImage.setTagList(tagList);
+            imgUrl = imgurService.upload(tmpFileLocation) ;
+            savedImage = new Image(imgUrl);
+            savedImage.setTagList(Arrays.asList(tagList.split(" ")));
             imageDAO.addImage(savedImage);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
-
         return mapper.writeValueAsString(savedImage);
     }
-
-    // ID of images in Google Drive (TMP -> must be removed from code)
-    //String dioID = "1o3n_8ZVbmx2ZvB5ZKBHd4iBHYeCle5y9";
-    //String jojoID = "1UEup0JRETegBHBX2oE98Y9qdqXllHUfc";
 }
