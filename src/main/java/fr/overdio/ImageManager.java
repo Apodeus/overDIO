@@ -44,7 +44,7 @@ public class ImageManager {
             image = imageDAO.getImageById(id);
         } catch (OverDioException e){
             //Write error code in response
-            throw new NotFoundException();
+            throw new NotFoundException("Can't find image with id : " + id);
         }
         return mapper.writeValueAsString(image);
     }
