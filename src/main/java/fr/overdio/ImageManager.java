@@ -14,6 +14,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.io.*;
 import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
 @Path("/images")
@@ -81,10 +82,21 @@ public class ImageManager {
     @GET
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public String getImagesByTags(String[] tags){
+    public List<Image> getImagesByTags(@HeaderParam("tags") List<String> tags){
         //todo
+        List<Image> images;
+        try {
+            LOGGER.info("zzzz");
+            images = imageDAO.getImagesByTags(tags);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new UncheckedIOException(e);
+        }
+        if(images == null){
+            throw new NotFoundException("Error no image found with these tags");
+        }
 
-        return null;
+        return images;
     }
 
     @POST

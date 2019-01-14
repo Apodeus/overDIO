@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,8 +37,8 @@ public class ImageDAO {
         this.collection = database.getCollection(DB_COLLECTION);
     }
 
-    public List<Image> getImagesByTags(List<String> tagList) throws IOException {
-        FindIterable<Document> documents = collection.find(Filters.all("tagList", tagList.toArray()));
+    public List<Image> getImagesByTags(List<String> tags) throws IOException {
+        FindIterable<Document> documents = collection.find(Filters.all("tagList",tags));
         List<Image> taggedImages = new ArrayList<>();
         for (Document doc : documents) {
             taggedImages.add(mapper.readValue(doc.toJson(), Image.class));
