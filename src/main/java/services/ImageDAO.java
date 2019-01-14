@@ -3,6 +3,7 @@ package services;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.MongoClient;
+import com.mongodb.MongoClientURI;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -21,7 +22,7 @@ import java.util.Optional;
 public class ImageDAO {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageDAO.class);
-    private static final String DB_NAME = "overDio";
+    private static final String DB_NAME = "overdio";
     private static final String DB_COLLECTION = "images";
     private final ObjectMapper mapper;
 
@@ -29,7 +30,8 @@ public class ImageDAO {
 
     public ImageDAO(){
         this.mapper = new ObjectMapper();
-        MongoClient mongoClient = new MongoClient();
+        MongoClientURI uri = new MongoClientURI("mongodb://dio:mudamudamuda42@ds157064.mlab.com:57064/overdio");
+        MongoClient mongoClient = new MongoClient(uri);
         MongoDatabase database = mongoClient.getDatabase(DB_NAME);
         this.collection = database.getCollection(DB_COLLECTION);
     }
