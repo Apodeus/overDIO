@@ -13,7 +13,6 @@ import services.ImgurService;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.io.*;
-import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.UUID;
 
@@ -28,7 +27,7 @@ public class ImageManager {
 
     //Todo : Injecter ces services dans le constructeur plutot que de les
     // créer dedans => Permet de mieux tester la partie Back (métier)
-    public ImageManager() throws GeneralSecurityException, IOException {
+    public ImageManager() {
         this.imgurService = new ImgurService();
         this.imageDAO = new ImageDAO();
         this.mapper = new ObjectMapper();
@@ -49,13 +48,13 @@ public class ImageManager {
         return mapper.writeValueAsString(image);
     }
 
-    @PUT //Should implement PATCH
+    @PATCH //Should implement PATCH
     @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public String updateImage(Image image, @PathParam("id") String id) throws JsonProcessingException {
-        if(id != image.get_id()){
-            LOGGER.warn("L''id de l''image donnée ne correspond pas à l''id de la route");
+        if(!id.equals(image.get_id())){
+            LOGGER.warn("L''id de l''image donnée ne correspond pas à l''id de la rout.\nAttendu : " + id + "\nRecu : " + image.get_id());
             throw new BadRequestException();
         }
         Image imageDB;
@@ -77,6 +76,15 @@ public class ImageManager {
             throw new BadRequestException();
         }
         return mapper.writeValueAsString(image);
+    }
+
+    @GET
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public String getImagesByTags(String[] tags){
+        //todo
+
+        return null;
     }
 
     @POST

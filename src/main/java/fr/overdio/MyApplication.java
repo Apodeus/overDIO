@@ -9,7 +9,7 @@ import javax.ws.rs.ApplicationPath;
 public class MyApplication extends ResourceConfig {
 
     public MyApplication(){
-        super(ImageManager.class, HelloWorldResource.class, MultiPartFeature.class);
+        super(ImageManager.class, MultiPartFeature.class);
     }
 
 }
