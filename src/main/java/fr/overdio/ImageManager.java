@@ -70,6 +70,7 @@ public class ImageManager {
             throw new BadRequestException();
         }
         //Then update in DB
+        LOGGER.info(image.getTagList().toString());
         try {
             imageDAO.update(image);
         } catch (JsonProcessingException e) {
@@ -82,11 +83,10 @@ public class ImageManager {
     @GET
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public List<Image> getImagesByTags(@HeaderParam("tags") List<String> tags){
-        //todo
+    public List<Image> getImagesByTags(@QueryParam("tags") List<String> tags){
         List<Image> images;
         try {
-            LOGGER.info("zzzz");
+            LOGGER.debug("requested tags : " + tags.toString() + " " + tags.size());
             images = imageDAO.getImagesByTags(tags);
         } catch (IOException e) {
             e.printStackTrace();
