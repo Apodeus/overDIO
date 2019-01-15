@@ -2,8 +2,28 @@
         "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
         "http://java.sun.com/dtd/web-app_2_3.dtd" >
 
+
+
 <web-app>
+
   <display-name>Rest OverDio Service</display-name>
+
+  <filter>
+    <filter-name>CorsFilter</filter-name>
+    <filter-class>org.apache.catalina.filters.CorsFilter</filter-class>
+    <init-param>
+      <param-name>cors.allowed.origins</param-name>
+      <param-value>*</param-value>
+    </init-param>
+    <init-param>
+      <param-name>cors.allowed.methods</param-name>
+      <param-value>GET,POST,HEAD,OPTIONS,PUT,DELETE</param-value>
+    </init-param>
+  </filter>
+  <filter-mapping>
+    <filter-name>CorsFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
 
   <servlet>
     <servlet-name>fr.overdio.resources.MyApplication</servlet-name>
@@ -14,6 +34,7 @@
     </init-param>
     <load-on-startup>1</load-on-startup>
   </servlet>
+
 
   <servlet-mapping>
     <servlet-name>fr.overdio.resources.MyApplication</servlet-name>
