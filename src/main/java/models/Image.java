@@ -31,7 +31,7 @@ public class Image {
         this._id = _id;
         this.imgUrl = imgUrl;
         this.tagList = tagList;
-        this.creationDate = timestamp.toString();
+        this.creationDate = String.valueOf(timestamp.getTime());
     }
 
     public String get_id() {
