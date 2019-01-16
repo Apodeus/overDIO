@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class ImageDAO {
 
@@ -31,7 +32,7 @@ public class ImageDAO {
 
     public ImageDAO(){
         this.mapper = new ObjectMapper();
-        MongoClientURI uri = new MongoClientURI("mongodb://dio:mudamudamuda42@ds157064.mlab.com:57064/overdio");
+        MongoClientURI uri = new MongoClientURI("mongodb://dio:mudamudamuda42@ds157064.mlab.com:57064/overdio");//todo
         MongoClient mongoClient = new MongoClient(uri);
         MongoDatabase database = mongoClient.getDatabase(DB_NAME);
         this.collection = database.getCollection(DB_COLLECTION);
@@ -54,14 +55,16 @@ public class ImageDAO {
     }
 
     public void addImage(Image image) throws JsonProcessingException {
-            String jsonString = mapper.writeValueAsString(image);
-            Document doc = Document.parse(jsonString);
-            collection.insertOne(doc);
-            //return "Utilisateur " + image.getFirstName() + " " + user.getLastName() + " added successfully.";
+        image.setTagList(image.getTagList().stream().distinct().collect(Collectors.toList()));
+        String jsonString = mapper.writeValueAsString(image);
+        Document doc = Document.parse(jsonString);
+        collection.insertOne(doc);
+        //return "Utilisateur " + image.getFirstName() + " " + user.getLastName() + " added successfully.";
     }
 
     public void update(Image image) throws JsonProcessingException {
         String id = image.get_id();
+        image.setTagList(image.getTagList().stream().distinct().collect(Collectors.toList()));
         LOGGER.info("Updating image with id : {}", id);
         String jsonString = mapper.writeValueAsString(image);
         collection.replaceOne(Filters.eq("_id", id), Document.parse(jsonString));
