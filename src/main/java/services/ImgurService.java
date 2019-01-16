@@ -12,6 +12,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.ws.rs.ClientErrorException;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -38,6 +39,10 @@ public class ImgurService {
         post.setEntity(entityBuilder.build());
 
         HttpResponse response = httpClient.execute(post);
+
+        if(response.getStatusLine().getStatusCode() != 200){
+            throw new ClientErrorException("Error while uploading image, wrong format type.", 422);
+        }
 
         byte[] buffer = new byte[BUFFER_SIZE];
         int lenght = response.getEntity().getContent().read(buffer);
