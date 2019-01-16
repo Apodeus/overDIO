@@ -81,9 +81,11 @@ public class ImageManager {
     }
 
     @GET
+    @Path("/tags")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public List<Image> getImagesByTags(@QueryParam("tags") List<String> tags){
+        LOGGER.info("Getting images using tags ...");
         List<Image> images;
         try {
             LOGGER.debug("requested tags : " + tags.toString() + " " + tags.size());
@@ -96,6 +98,19 @@ public class ImageManager {
             throw new NotFoundException("Error no image found with these tags");
         }
 
+        return images;
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<Image> getImagesByTags(){
+        LOGGER.info("Getting last uploaded images ...");
+        List<Image> images = null;
+        try {
+            images = imageDAO.getLastUploadedImages(20);
+        } catch (IOException e) {
+            throw new InternalServerErrorException(e.getMessage(), e);
+        }
         return images;
     }
 

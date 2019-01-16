@@ -12,7 +12,8 @@ public class Image {
     private String _id;
     private String imgUrl;
     private List<String> tagList;
-    private Timestamp creationDate;
+
+    private String creationDate;
 
     public Image(){
         this(null);
@@ -23,10 +24,14 @@ public class Image {
     }
 
     public Image(String _id, String imgUrl, List<String> tagList){
+        this(_id, imgUrl, tagList, Timestamp.valueOf(LocalDateTime.now()));
+    }
+
+    public Image(String _id, String imgUrl, List<String> tagList, Timestamp timestamp){
         this._id = _id;
         this.imgUrl = imgUrl;
         this.tagList = tagList;
-        this.creationDate = Timestamp.valueOf(LocalDateTime.now());
+        this.creationDate = timestamp.toString();
     }
 
     public String get_id() {
@@ -45,23 +50,23 @@ public class Image {
         this.imgUrl = imgUrl;
     }
 
-    public void setTagList(List<String> tagList) {
-        this.tagList = tagList;
-    }
-
     public List<String> getTagList() {
         return tagList;
     }
 
-    public String toString(){
-        return MessageFormat.format("id: {0}\nid_drive: {1}\ntags: {2}\ncreationDate: {3}\n",_id, imgUrl, tagList.toString(), creationDate.toString());
+    public void setTagList(List<String> tagList) {
+        this.tagList = tagList;
     }
 
-    public Timestamp getCreationDate() {
+    public String getCreationDate() {
         return creationDate;
     }
 
-    public void setCreationDate(Timestamp creationDate) {
+    public void setCreationDate(String creationDate) {
         this.creationDate = creationDate;
+    }
+
+    public String toString(){
+        return MessageFormat.format("id: {0}\nid_drive: {1}\ntags: {2}\ncreationDate: {3}\n",_id, imgUrl, tagList.toString(), creationDate.toString());
     }
 }

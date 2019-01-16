@@ -8,6 +8,7 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Sorts;
 import exceptions.OverDioException;
 import models.Image;
 import org.bson.Document;
@@ -68,6 +69,15 @@ public class ImageDAO {
         LOGGER.info("Updating image with id : {}", id);
         String jsonString = mapper.writeValueAsString(image);
         collection.replaceOne(Filters.eq("_id", id), Document.parse(jsonString));
+    }
+
+    public List<Image> getLastUploadedImages(int n) throws IOException {
+        FindIterable<Document> documents = collection.find().sort(Sorts.descending("creationDate")).limit(n);
+        List<Image> lastImages = new ArrayList<>();
+        for(Document doc : documents){
+            lastImages.add(mapper.readValue(doc.toJson(), Image.class));
+        }
+        return lastImages;
     }
 
 
