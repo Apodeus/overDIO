@@ -1,6 +1,8 @@
 package models;
 
+import java.sql.Timestamp;
 import java.text.MessageFormat;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -10,6 +12,7 @@ public class Image {
     private String _id;
     private String imgUrl;
     private List<String> tagList;
+    private Timestamp creationDate;
 
     public Image(){
         this(null);
@@ -23,6 +26,7 @@ public class Image {
         this._id = _id;
         this.imgUrl = imgUrl;
         this.tagList = tagList;
+        this.creationDate = Timestamp.valueOf(LocalDateTime.now());
     }
 
     public String get_id() {
@@ -50,6 +54,14 @@ public class Image {
     }
 
     public String toString(){
-        return MessageFormat.format("id: {0}\nid_drive: {1}\ntags: {2}",_id, imgUrl, tagList.toString());
+        return MessageFormat.format("id: {0}\nid_drive: {1}\ntags: {2}\ncreationDate: {3}\n",_id, imgUrl, tagList.toString(), creationDate.toString());
+    }
+
+    public Timestamp getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(Timestamp creationDate) {
+        this.creationDate = creationDate;
     }
 }

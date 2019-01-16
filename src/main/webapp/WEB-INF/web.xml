@@ -20,6 +20,7 @@
       <param-value>GET,POST,HEAD,OPTIONS,PUT,DELETE</param-value>
     </init-param>
   </filter>
+
   <filter-mapping>
     <filter-name>CorsFilter</filter-name>
     <url-pattern>/*</url-pattern>
