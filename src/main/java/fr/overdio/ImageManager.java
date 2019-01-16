@@ -16,6 +16,7 @@ import java.io.*;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Path("/images")
 public class ImageManager {
@@ -81,7 +82,7 @@ public class ImageManager {
     }
 
     @GET
-    @Path("/tags")
+    @Path("/searchByTags")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public List<Image> getImagesByTags(@QueryParam("tags") List<String> tags){
@@ -107,11 +108,11 @@ public class ImageManager {
         LOGGER.info("Getting last uploaded images ...");
         List<Image> images = null;
         try {
-            images = imageDAO.getLastUploadedImages(20);
+            images = imageDAO.getLastUploadedImages(10);
         } catch (IOException e) {
             throw new InternalServerErrorException(e.getMessage(), e);
         }
-        return images;
+        return images.stream().sorted((img1, img2) -> Long.valueOf(img2.getCreationDate()).compareTo(Long.valueOf(img1.getCreationDate()))).collect(Collectors.toList());
     }
 
     @POST
