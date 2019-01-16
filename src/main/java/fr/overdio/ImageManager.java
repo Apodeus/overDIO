@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import services.ImageDAO;
 import services.ImgurService;
 
+import javax.inject.Singleton;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.io.*;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Singleton
 @Path("/images")
 public class ImageManager {
 
