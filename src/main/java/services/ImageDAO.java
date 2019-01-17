@@ -16,9 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ImageDAO {
@@ -64,7 +62,15 @@ public class ImageDAO {
 
     public void update(Image image) throws JsonProcessingException {
         String id = image.get_id();
-        image.setTagList(image.getTagList().stream().filter(tag -> !tag.isEmpty() && !tag.matches(" +")).distinct().collect(Collectors.toList()));
+        //Remove empty tags, only whitespaces tags, tags separated by whitespaces
+        // and duplicated tags
+        image.setTagList(image.getTagList().stream()
+                .filter(tag -> !tag.isEmpty() && !tag.matches(" +"))
+                .map(tag -> Arrays.asList(tag.split(" +")))
+                .flatMap(Collection::stream)
+                .filter(tag -> !tag.isEmpty())
+                .distinct()
+                .collect(Collectors.toList()));
         LOGGER.info("Updating image with id : {}", id);
         String jsonString = mapper.writeValueAsString(image);
         collection.replaceOne(Filters.eq("_id", id), Document.parse(jsonString));
