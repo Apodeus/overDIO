@@ -52,7 +52,7 @@ public class ImageManager {
         return mapper.writeValueAsString(image);
     }
 
-    @PUT
+    @PATCH
     @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
