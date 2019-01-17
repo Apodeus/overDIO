@@ -56,7 +56,7 @@ public class ImageManager {
     @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public String updateImage(Image image, @PathParam("id") String id) throws JsonProcessingException {
+    public Image updateImage(Image image, @PathParam("id") String id) throws JsonProcessingException {
         if(!id.equals(image.get_id())){
             LOGGER.warn("L''id de l''image donnée ne correspond pas à l''id de la rout.\nAttendu : " + id + "\nRecu : " + image.get_id());
             throw new BadRequestException();
@@ -72,6 +72,10 @@ public class ImageManager {
             LOGGER.warn("L''image correspondant à la route et l''image donnée n''ont pas le meme id google drive");
             throw new BadRequestException();
         }
+        if(!imageDB.getCreationDate().equals(image.getCreationDate())){
+            LOGGER.warn("L'image n'a pas la bonne date de creation !");
+            throw new BadRequestException();
+        }
         //Then update in DB
         LOGGER.info(image.getTagList().toString());
         try {
@@ -80,7 +84,7 @@ public class ImageManager {
             LOGGER.warn("Erreur lors de la mise à jour de l''image donnée en base de donnée");
             throw new BadRequestException();
         }
-        return mapper.writeValueAsString(image);
+        return image;
     }
 
     @GET
