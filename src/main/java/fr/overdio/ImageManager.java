@@ -140,7 +140,8 @@ public class ImageManager {
         try {
             imgUrl = imgurService.upload(tmpFileLocation) ;
             savedImage = new Image(imgUrl);
-            savedImage.setTagList(Arrays.asList(tagList.split(" ")));
+            tagList = tagList.replaceAll(" +", " ");
+            savedImage.setTagList(Arrays.asList(tagList.split(" +")));
             imageDAO.addImage(savedImage);
         } catch (IOException e) {
             throw new UncheckedIOException(e);

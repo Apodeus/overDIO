@@ -55,7 +55,7 @@ public class ImageDAO {
     }
 
     public void addImage(Image image) throws JsonProcessingException {
-        image.setTagList(image.getTagList().stream().filter(tag -> !tag.isEmpty() && !tag.matches("\\w+")).distinct().collect(Collectors.toList()));
+        image.setTagList(image.getTagList().stream().distinct().collect(Collectors.toList()));
         String jsonString = mapper.writeValueAsString(image);
         Document doc = Document.parse(jsonString);
         collection.insertOne(doc);
@@ -64,7 +64,7 @@ public class ImageDAO {
 
     public void update(Image image) throws JsonProcessingException {
         String id = image.get_id();
-        image.setTagList(image.getTagList().stream().filter(tag -> !tag.isEmpty() && !tag.matches("\\w+")).distinct().collect(Collectors.toList()));
+        image.setTagList(image.getTagList().stream().filter(tag -> !tag.isEmpty() && !tag.matches(" +")).distinct().collect(Collectors.toList()));
         LOGGER.info("Updating image with id : {}", id);
         String jsonString = mapper.writeValueAsString(image);
         collection.replaceOne(Filters.eq("_id", id), Document.parse(jsonString));
