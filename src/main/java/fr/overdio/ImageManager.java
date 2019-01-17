@@ -59,22 +59,22 @@ public class ImageManager {
     public Image updateImage(Image image, @PathParam("id") String id) throws JsonProcessingException {
         if(!id.equals(image.get_id())){
             LOGGER.warn("L''id de l''image donnée ne correspond pas à l''id de la rout.\nAttendu : " + id + "\nRecu : " + image.get_id());
-            throw new BadRequestException();
+            throw new BadRequestException("L''id de l''image donnée ne correspond pas à l''id de la rout.\nAttendu : " + id + "\nRecu : " + image.get_id());
         }
         Image imageDB;
         try {
             imageDB = imageDAO.getImageById(id);
         } catch (IOException e) {
             LOGGER.warn("Erreur lors de la récupération de l''image en BDD avec l''id = {}", id);
-            throw new InternalServerErrorException();
+            throw new InternalServerErrorException("Erreur lors de la récupération de l''image en BDD avec l''id = " + id);
         }
         if(!imageDB.getImgUrl().equals(image.getImgUrl())){
-            LOGGER.warn("L''image correspondant à la route et l''image donnée n''ont pas le meme id google drive");
-            throw new BadRequestException();
+            LOGGER.warn("L''image correspondant à la route et l''image donnée n''ont pas la meme url");
+            throw new BadRequestException("L''image correspondant à la route et l''image donnée n''ont pas la meme url");
         }
         if(!imageDB.getCreationDate().equals(image.getCreationDate())){
             LOGGER.warn("L'image n'a pas la bonne date de creation !");
-            throw new BadRequestException();
+            throw new BadRequestException("L'image n'a pas la bonne date de creation !");
         }
         //Then update in DB
         LOGGER.info(image.getTagList().toString());
@@ -82,7 +82,7 @@ public class ImageManager {
             imageDAO.update(image);
         } catch (JsonProcessingException e) {
             LOGGER.warn("Erreur lors de la mise à jour de l''image donnée en base de donnée");
-            throw new BadRequestException();
+            throw new BadRequestException("Erreur lors de la mise à jour de l''image donnée en base de donnée");
         }
         return image;
     }
