@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static java.text.MessageFormat.format;
+
 @Singleton
 @Path("/images")
 public class ImageManager {
@@ -30,8 +32,6 @@ public class ImageManager {
     private final ObjectMapper mapper;
     private final ImgurService imgurService;
 
-    //Todo : Injecter ces services dans le constructeur plutot que de les
-    // créer dedans => Permet de mieux tester la partie Back (métier)
     public ImageManager() {
         this.imgurService = new ImgurService();
         this.imageDAO = new ImageDAO();
@@ -47,8 +47,7 @@ public class ImageManager {
         try {
             image = imageDAO.getImageById(id);
         } catch (OverDioException e){
-            //Write error code in response
-            throw new NotFoundException("Can't find image with id : " + id);
+            throw new NotFoundException(Response.status(404,"Aucune image trouvée avec l'id : " + id).build());
         }
         return mapper.writeValueAsString(image);
     }
@@ -57,10 +56,10 @@ public class ImageManager {
     @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Image updateImage(Image image, @PathParam("id") String id) throws JsonProcessingException {
+    public Image updateImage(Image image, @PathParam("id") String id) {
         if(!id.equals(image.get_id())){
-            LOGGER.warn("L''id de l''image donnée ne correspond pas à l''id de la rout.\nAttendu : " + id + "\nRecu : " + image.get_id());
-            throw new BadRequestException(Response.status(400, "L''id de l''image donnée ne correspond pas à l''id de la rout.\nAttendu : " + id + "\nRecu : " + image.get_id()).build());
+            LOGGER.warn(format("L''id de l''image donnée ne correspond pas à l''id de la rout.\nAttendu : {0}\nRecu : {1}", id , image.get_id()));
+            throw new BadRequestException(Response.status(400, format("L''id de l''image donnée ne correspond pas à l''id de la rout.\nAttendu : {0}\nRecu : {1}", id , image.get_id())).build());
         }
         Image imageDB;
         try {
@@ -75,7 +74,7 @@ public class ImageManager {
         }
         if(!imageDB.getCreationDate().equals(image.getCreationDate())){
             LOGGER.warn("L'image n'a pas la bonne date de creation !");
-            throw new BadRequestException(Response.status(400, "L'image n'a pas la bonne date de creation !\nImage BDD : " + imageDB.toString()  + "\nImage de la requete : " + image.toString()).build());
+            throw new BadRequestException(Response.status(400, format("L'image n'a pas la bonne date de creation !\nImage BDD : {0}\nImage de la requete : {1}", imageDB.toString() , image.toString())).build());
         }
         //Then update in DB
         LOGGER.info(image.getTagList().toString());
@@ -93,17 +92,16 @@ public class ImageManager {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public List<Image> getImagesByTags(@QueryParam("tags") List<String> tags){
-        LOGGER.info("Getting images using tags ...");
         List<Image> images;
         try {
-            LOGGER.debug("requested tags : " + tags.toString() + " " + tags.size());
+            LOGGER.debug("Tags de la requete : " + tags.toString() + " " + tags.size());
             images = imageDAO.getImagesByTags(tags);
         } catch (IOException e) {
-            e.printStackTrace();
             throw new UncheckedIOException(e);
         }
+
         if(images == null){
-            throw new NotFoundException("Error no image found with these tags");
+            throw new NotFoundException(Response.status(404, "Erreur, aucune image trouvée avec ces tags.").build());
         }
 
         return images;
@@ -112,28 +110,29 @@ public class ImageManager {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public List<Image> getImagesByTags(){
-        LOGGER.info("Getting last uploaded images ...");
-        List<Image> images = null;
+        List<Image> images;
         try {
-            images = imageDAO.getLastUploadedImages(10);
+            images = imageDAO.getLastUploadedImages(20);
         } catch (IOException e) {
-            throw new InternalServerErrorException(e.getMessage(), e);
+            throw new InternalServerErrorException(Response.status(500, e.getMessage()).build(), e);
         }
-        return images.stream().sorted((img1, img2) -> Long.valueOf(img2.getCreationDate()).compareTo(Long.valueOf(img1.getCreationDate()))).collect(Collectors.toList());
+        return images.stream()
+                .sorted((img1, img2) -> Long.valueOf(img2.getCreationDate()).compareTo(Long.valueOf(img1.getCreationDate())))
+                .collect(Collectors.toList());
     }
 
     @POST
     @Path("/upload")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
-    public String addImage(@FormDataParam("data") InputStream image,
+    public Image addImage(@FormDataParam("data") InputStream image,
                            @FormDataParam("tagList") String tagList) throws IOException {
         String fp = UUID.randomUUID().toString();
         String tmpFileLocation = "/tmp/" + fp + ".jpg";
-        File f = new File(tmpFileLocation);
+        File tmpFile = new File(tmpFileLocation);
 
-        FileOutputStream fos = new FileOutputStream(f);
-        int read = 0;
+        FileOutputStream fos = new FileOutputStream(tmpFile);
+        int read;
         byte[] buffer = new byte[1024];
         while ((read = image.read(buffer)) != -1){
             fos.write(buffer, 0, read);
@@ -151,6 +150,6 @@ public class ImageManager {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
-        return mapper.writeValueAsString(savedImage);
+        return savedImage;
     }
 }

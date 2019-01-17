@@ -30,7 +30,7 @@ public class ImageDAO {
 
     public ImageDAO(){
         this.mapper = new ObjectMapper();
-        MongoClientURI uri = new MongoClientURI("mongodb://dio:mudamudamuda42@ds157064.mlab.com:57064/overdio");//todo
+        MongoClientURI uri = new MongoClientURI("mongodb://dio:mudamudamuda42@ds157064.mlab.com:57064/overdio");
         MongoClient mongoClient = new MongoClient(uri);
         MongoDatabase database = mongoClient.getDatabase(DB_NAME);
         this.collection = database.getCollection(DB_COLLECTION);
@@ -48,7 +48,7 @@ public class ImageDAO {
     public Image getImageById(String id) throws IOException {
         FindIterable<Document> documents = collection.find(Filters.eq("_id", id));
         Document doc = Optional.ofNullable(documents.first())
-                .orElseThrow(() -> new OverDioException("No image found with id = " + id));
+                .orElseThrow(() -> new OverDioException("Aucune image trouvée d'id : " + id));
         return mapper.readValue(doc.toJson(), Image.class);
     }
 
@@ -57,21 +57,21 @@ public class ImageDAO {
         String jsonString = mapper.writeValueAsString(image);
         Document doc = Document.parse(jsonString);
         collection.insertOne(doc);
-        //return "Utilisateur " + image.getFirstName() + " " + user.getLastName() + " added successfully.";
     }
 
     public void update(Image image) throws JsonProcessingException {
         String id = image.get_id();
         //Remove empty tags, only whitespaces tags, tags separated by whitespaces
         // and duplicated tags
-        image.setTagList(image.getTagList().stream()
+        image.setTagList(
+                image.getTagList().stream()
                 .filter(tag -> !tag.isEmpty() && !tag.matches(" +"))
                 .map(tag -> Arrays.asList(tag.split(" +")))
                 .flatMap(Collection::stream)
                 .filter(tag -> !tag.isEmpty())
                 .distinct()
                 .collect(Collectors.toList()));
-        LOGGER.info("Updating image with id : {}", id);
+        LOGGER.info("Mis à jour de l'image d'id : {}", id);
         String jsonString = mapper.writeValueAsString(image);
         collection.replaceOne(Filters.eq("_id", id), Document.parse(jsonString));
     }

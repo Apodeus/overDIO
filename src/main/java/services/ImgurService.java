@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.ClientErrorException;
+import javax.ws.rs.core.Response;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -41,14 +42,14 @@ public class ImgurService {
         HttpResponse response = httpClient.execute(post);
 
         if(response.getStatusLine().getStatusCode() != 200){
-            throw new ClientErrorException("Error while uploading image, wrong format type.", 422);
+            throw new ClientErrorException(Response.status(422, "Erreur durant l'upload, le fichier n'est pas une image ou un gif.").build());
         }
 
         byte[] buffer = new byte[BUFFER_SIZE];
         int lenght = response.getEntity().getContent().read(buffer);
-        String ex = new String(Arrays.copyOf(buffer, lenght));
+        String imgurResponse = new String(Arrays.copyOf(buffer, lenght));
 
-        JsonObject obj = new JsonParser().parse(ex).getAsJsonObject();
+        JsonObject obj = new JsonParser().parse(imgurResponse).getAsJsonObject();
         String imgUrl = obj.get(DATA_NODE).getAsJsonObject().get(LINK_NODE).getAsString();
         LOGGER.info("URL on imgur is : {}", imgUrl);
         return imgUrl;
