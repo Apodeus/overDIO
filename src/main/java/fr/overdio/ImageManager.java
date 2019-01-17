@@ -13,6 +13,7 @@ import services.ImgurService;
 import javax.inject.Singleton;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.io.*;
 import java.util.Arrays;
 import java.util.List;
@@ -59,22 +60,22 @@ public class ImageManager {
     public Image updateImage(Image image, @PathParam("id") String id) throws JsonProcessingException {
         if(!id.equals(image.get_id())){
             LOGGER.warn("L''id de l''image donnée ne correspond pas à l''id de la rout.\nAttendu : " + id + "\nRecu : " + image.get_id());
-            throw new BadRequestException("L''id de l''image donnée ne correspond pas à l''id de la rout.\nAttendu : " + id + "\nRecu : " + image.get_id());
+            throw new BadRequestException(Response.status(400, "L''id de l''image donnée ne correspond pas à l''id de la rout.\nAttendu : " + id + "\nRecu : " + image.get_id()).build());
         }
         Image imageDB;
         try {
             imageDB = imageDAO.getImageById(id);
         } catch (IOException e) {
             LOGGER.warn("Erreur lors de la récupération de l''image en BDD avec l''id = {}", id);
-            throw new InternalServerErrorException("Erreur lors de la récupération de l''image en BDD avec l''id = " + id);
+            throw new InternalServerErrorException(Response.status(500, "Erreur lors de la récupération de l''image en BDD avec l''id = " + id).build());
         }
         if(!imageDB.getImgUrl().equals(image.getImgUrl())){
             LOGGER.warn("L''image correspondant à la route et l''image donnée n''ont pas la meme url");
-            throw new BadRequestException("L''image correspondant à la route et l''image donnée n''ont pas la meme url");
+            throw new BadRequestException(Response.status(400, "L''image correspondant à la route et l''image donnée n''ont pas la meme url").build());
         }
         if(!imageDB.getCreationDate().equals(image.getCreationDate())){
             LOGGER.warn("L'image n'a pas la bonne date de creation !");
-            throw new BadRequestException("L'image n'a pas la bonne date de creation !");
+            throw new BadRequestException(Response.status(400, "L'image n'a pas la bonne date de creation !").build());
         }
         //Then update in DB
         LOGGER.info(image.getTagList().toString());
@@ -82,7 +83,7 @@ public class ImageManager {
             imageDAO.update(image);
         } catch (JsonProcessingException e) {
             LOGGER.warn("Erreur lors de la mise à jour de l''image donnée en base de donnée");
-            throw new BadRequestException("Erreur lors de la mise à jour de l''image donnée en base de donnée");
+            throw new BadRequestException(Response.status(400, "Erreur lors de la mise à jour de l''image donnée en base de donnée").build());
         }
         return image;
     }
