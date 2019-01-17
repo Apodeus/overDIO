@@ -75,7 +75,7 @@ public class ImageManager {
         }
         if(!imageDB.getCreationDate().equals(image.getCreationDate())){
             LOGGER.warn("L'image n'a pas la bonne date de creation !");
-            throw new BadRequestException(Response.status(400, "L'image n'a pas la bonne date de creation !").build());
+            throw new BadRequestException(Response.status(400, "L'image n'a pas la bonne date de creation !\nImage BDD : " + imageDB.toString()  + "\nImage de la requete : " + image.toString()).build());
         }
         //Then update in DB
         LOGGER.info(image.getTagList().toString());
