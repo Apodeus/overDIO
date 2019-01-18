@@ -8,6 +8,7 @@ import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import services.ImageDAO;
+import services.ImageService;
 import services.ImgurService;
 
 import javax.inject.Singleton;
@@ -30,7 +31,7 @@ public class ImageManager {
 
     private final ImageDAO imageDAO;
     private final ObjectMapper mapper;
-    private final ImgurService imgurService;
+    private final ImageService imgurService;
 
     public ImageManager() {
         this.imgurService = new ImgurService();

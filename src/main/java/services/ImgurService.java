@@ -18,7 +18,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 
-public class ImgurService {
+public class ImgurService implements ImageService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ImgurService.class);
     private static final String URL_IMGUR = "https://api.imgur.com/3/image";
@@ -27,6 +27,7 @@ public class ImgurService {
     private static final String LINK_NODE = "link";
     private static final String CLIENT_ID = "Client-ID 1b90c8cef21c298";
 
+    @Override
     public String upload(String path) throws IOException {
         File img = new File(path);
         HttpClient httpClient = HttpClients.createDefault();
